@@ -1,0 +1,7 @@
+{
+  "name": "smartfridge",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}

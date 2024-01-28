@@ -1,0 +1,11 @@
+.headcontainer{
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.headtitle{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
