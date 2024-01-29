@@ -31,6 +31,23 @@ import BuyPage from './pages/BuyPage';
 
 setupIonicReact();
 
+const LogoutRoute: React.FC = () => {
+  useEffect(() => {
+    const logout = async () => {
+      console.log('Logout...');
+      const storage = new Storage();
+      await storage.create();
+      await storage.remove('auth-token');
+      window.location.href = '/login';
+    };
+
+    logout();
+  }, []);
+
+  // Render nothing while the logout operation is in progress
+  return null;
+};
+
 const App: React.FC = () => {
   const [authCode, setAuthCode] = useState<string | null>(null);
 
@@ -65,6 +82,7 @@ const App: React.FC = () => {
             </Route>
             <Route path="/fridge-details/:refID" component={FridgeDetailsPage} />
             <Route path="/buy-items/:refID" component={BuyPage} />
+            <Route path="/logout" component={LogoutRoute} />
           </IonRouterOutlet>
         </IonSplitPane>
       </IonReactRouter>

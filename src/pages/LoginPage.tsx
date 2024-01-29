@@ -1,5 +1,6 @@
 import { IonButton, IonContent, IonInput, IonLoading } from "@ionic/react";
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { Storage } from '@ionic/storage';
 
 import "./LoginPage.css";
@@ -8,12 +9,14 @@ const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const history = useHistory();
 
   const handleLogin = async () => {
     try {
       setIsLoading(true);
       const store = new Storage();
       await store.create();
+      
       // Make an API call for authentication
       const response = await fetch("http://localhost:3000/auth/login", {
         method: "POST",
@@ -30,6 +33,9 @@ const LoginPage: React.FC = () => {
         if (authToken) {
           await store.set('auth-token', authToken);
           console.log('Auth Token:', authToken);
+          
+          // Redirect to the homepage upon successful login
+          history.push("/home");
         } else {
           console.error('Auth token not found in headers or body');
         }
