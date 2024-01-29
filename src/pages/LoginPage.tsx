@@ -1,7 +1,8 @@
-import { IonButton, IonContent, IonInput, IonLoading } from "@ionic/react";
+import { IonButton, IonContent, IonInput, IonLoading, IonList, IonItem, IonIcon } from "@ionic/react";
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Storage } from '@ionic/storage';
+import { eye, lockClosed } from 'ionicons/icons';
 
 import "./LoginPage.css";
 
@@ -50,7 +51,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <IonContent className="ion-padding">
+    <IonContent className="ion-padding" color="tertiary">
       <div className="container">
         <h1 className="title">Login</h1>
         <IonInput
@@ -60,8 +61,10 @@ const LoginPage: React.FC = () => {
           label="Username"
           labelPlacement="floating"
           fill="outline"
-          placeholder="Enter text"
-        ></IonInput>
+          placeholder="Username"
+          shape="round"
+        >
+        </IonInput>
         <IonInput
           value={password}
           onIonChange={(e) => setPassword(e.detail.value!)}
@@ -70,14 +73,17 @@ const LoginPage: React.FC = () => {
           labelPlacement="floating"
           type="password"
           fill="outline"
-          placeholder="Enter text"
-        ></IonInput>
+          placeholder="Password"
+          shape="round"
+        >
+        </IonInput>
         <div className="button">
           <IonButton
             shape="round"
             onClick={handleLogin}
             disabled={isLoading}
             className="custom-button"
+            color="secondary"
           >
             Login
           </IonButton>
