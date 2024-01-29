@@ -1,21 +1,30 @@
+
 .title{
     color:#03045e; 
     font-size: xx-large;
     font-weight: bolder;
+    margin-bottom: 2rem;
 }
 
 .container{
     margin-top: 5rem;
     padding: 0px 2rem;
+    height: 100vh;
 }
 
 ion-input{
-    margin-top: 1rem;
+    margin-top: 0.6rem;
 }
 
 .button{
     display: flex;
     justify-content: center;
-    margin-top: 1rem;
+    margin-top: 0.6rem;
 }
+
+.custom-button{ 
+    width: 200px; 
+    height: 60px;
+}
+
     
