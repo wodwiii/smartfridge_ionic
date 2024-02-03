@@ -44,7 +44,7 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
           history.push("/login");
           return;
         }
-        const response = await fetch(`http://localhost:3000/fridge/${refID}`, {
+        const response = await fetch(`https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

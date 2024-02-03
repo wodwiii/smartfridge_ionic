@@ -19,7 +19,7 @@ const LoginPage: React.FC = () => {
       await store.create();
       
       // Make an API call for authentication
-      const response = await fetch("http://localhost:3000/auth/login", {
+      const response = await fetch("https://infinite-byte-413002.as.r.appspot.com/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

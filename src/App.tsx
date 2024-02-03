@@ -40,11 +40,8 @@ const LogoutRoute: React.FC = () => {
       await storage.remove('auth-token');
       window.location.href = '/login';
     };
-
     logout();
   }, []);
-
-  // Render nothing while the logout operation is in progress
   return null;
 };
 
@@ -66,7 +63,6 @@ const App: React.FC = () => {
 
   return (
     <IonApp>
-
       <IonReactRouter>
       <Menu/>
         <IonSplitPane contentId="main">

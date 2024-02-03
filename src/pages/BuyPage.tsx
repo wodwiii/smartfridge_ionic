@@ -28,7 +28,7 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
       await store.create();
       const authToken = await store.get('auth-token');
 
-      const response = await fetch(`http://localhost:3000/fridge/${refID}`, {
+      const response = await fetch(`https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
         await store.create();
         const authToken = await store.get('auth-token');
         const detailsPromises = itemCodes.map(async (itemCode: any) => {
-          const response = await fetch(`http://localhost:3000/fridge/${refID}/${itemCode}`, {
+          const response = await fetch(`https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}/${itemCode}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
     // Fetch initial data from the database during component mount
     initialfetchDataFromDatabase();
 
-    const newWs = new WebSocket('ws://localhost:3000');
+    const newWs = new WebSocket('ws://infinite-byte-413002.as.r.appspot.com');
     setWs(newWs);
 
     newWs.onopen = () => {

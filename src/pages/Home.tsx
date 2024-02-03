@@ -1,8 +1,9 @@
-import {  IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonList, IonLoading, IonMenuButton,  IonPage, IonSearchbar,} from '@ionic/react';
+import {  IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonList, IonLoading, IonMenuButton,  IonPage, IonSearchbar, IonToolbar,} from '@ionic/react';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 import './Home.css';
 import { useEffect, useState } from 'react';
 import { Storage } from '@ionic/storage';
+import { caretForward, chevronForwardCircle, locationSharp, logoIonic, storefront } from 'ionicons/icons';
 
 const Home: React.FC<RouteComponentProps> = ({ history }) => {
 
@@ -21,7 +22,7 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
           setRedirectToLogin(true);
           return;
         }
-        const response = await fetch('http://localhost:3000/fridge/list', {
+        const response = await fetch('https://infinite-byte-413002.as.r.appspot.com/fridge/list', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -54,19 +55,33 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
 
   return (
     <IonPage>
-        <IonButtons slot="start">
-          <IonMenuButton autoHide={true}></IonMenuButton>
+      <div className="header">
+      <IonToolbar class="customToolbar">
+        <IonButtons class="customMenu" slot="start">
+          <IonMenuButton  autoHide={true}></IonMenuButton>
         </IonButtons>
+      </IonToolbar>
+      <IonToolbar class="customToolbar">
+      <IonSearchbar  placeholder="Search for smart fridge" class="customSearch"></IonSearchbar>
+      </IonToolbar>
+      </div> 
 
       <IonContent>
-        <IonSearchbar placeholder="Search for smart fridge"></IonSearchbar>
         <IonLoading isOpen={loading} message="Loading..." />
         <IonList>
           {fridges.map((fridge) => (
             <IonCard key={fridge._id} onClick={() => handleCardClick(fridge.fridge_id)}>
             <IonCardHeader>
+              
               <IonCardSubtitle>{fridge.fridge_id}</IonCardSubtitle>
-              <IonCardTitle>{fridge.location}</IonCardTitle>
+              <div className="fridgeTitle">
+                <div className="loc">
+                <IonCardTitle><IonIcon icon={locationSharp} size="large" color='primary'></IonIcon>{fridge.location}</IonCardTitle>
+                </div>
+                <div className="nextBtn">
+                <IonIcon icon={chevronForwardCircle} size="large" color='primary'></IonIcon>
+                </div>
+              </div>
             </IonCardHeader>
             <IonCardContent>
               <p>Status: {fridge.status}</p>
