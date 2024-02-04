@@ -159,34 +159,21 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
               <div className="headtitle">
                 <h6 style={{ margin: 0 }}>{fridgeDetails.fridge_id}</h6>
                 <h1 style={{ margin: 0 }}>{fridgeDetails.location}</h1>
-                <p className="status"><IonIcon id="hover-trigger" color="primary" icon={informationCircleSharp}/>{fridgeDetails.status}</p>
-                  <IonPopover trigger="hover-trigger" triggerAction="hover">
-                    <IonContent class="ion-padding">This refrigerator is currently unavailable.</IonContent>
-                  </IonPopover>
+                <p className="status">
+                  <IonIcon
+                    id="hover-trigger"
+                    color="primary"
+                    icon={informationCircleSharp}
+                  />
+                  {fridgeDetails.status}
+                </p>
+                <IonPopover trigger="hover-trigger" triggerAction="hover">
+                  <IonContent class="ion-padding">
+                    This refrigerator is currently unavailable.
+                  </IonContent>
+                </IonPopover>
               </div>
-              <div className="refinfo">
-              <p style={{ margin: 0 }}>
-                <IonIcon color="primary" icon={thermometerOutline} />{" "}
-                {getLatestTemperature()} °C
-              </p>
-              {getLatestLockState() && (
-                <>
-                  <p style={{ margin: 0 }}>
-                    {getLatestLockState().locked ? (
-                      <>
-                        <IonIcon color="primary" icon={lockClosedSharp} /> Ready
-                        to serve
-                      </>
-                    ) : (
-                      <>
-                        <IonIcon color="primary" icon={lockOpenSharp} /> Someone
-                        is buying
-                      </>
-                    )}
-                  </p>
-                </>
-              )}
-            </div>
+            
             </div>
 
             {fridgeDetails.info.info.items_present.list.length > 0 && (
@@ -232,13 +219,13 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
           vertical="bottom"
           style={{
             position: "absolute",
-            left: "50%",
+            left: "80%",
             transform: "translate(-50%, -50%)",
           }}
           slot="fixed"
         >
           <IonFabButton onClick={buyItems}>
-            <IonIcon icon={qrCode}></IonIcon>
+            <IonIcon size="large" icon={lockOpenSharp}></IonIcon>
           </IonFabButton>
         </IonFab>
       </IonContent>

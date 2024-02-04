@@ -159,7 +159,7 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
           slot="fixed"
         >
           <IonFabButton>
-            <IonIcon icon={qrCode}></IonIcon>
+            <IonIcon size="large" icon={qrCode}></IonIcon>
           </IonFabButton>
         </IonFab>
       </IonContent>
