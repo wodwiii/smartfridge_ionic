@@ -1,11 +1,82 @@
-.headcontainer{
-    display:flex;
+/* Header styles */
+.fridgeheader {
+    box-shadow: none !important;
+    .headertitle {
+        font-size: 1.2rem;
+      }
+  }
+  
+  /* Head Container */
+  .headcontainer {
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
-}
-
-.headtitle{
+  
+    /* Head Title */
+    .headtitle {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+  
+      h6 {
+        font-weight: 300;
+      }
+  
+      h1 {
+        font-weight: 700;
+      }
+    }
+  }
+  
+  /* Product Styles */
+  .itemcode {
+    font-size: 0.5rem !important;
+  }
+  
+  .productname {
+    font-size: 1.2rem !important;
+    font-weight: 400;
+  }
+  
+  .price {
+    font-size: 1rem !important;
+  }
+  
+  /* Ionic Styles */
+  ion-label {
+    color: #03045e;
+  }
+  
+  ion-content.padding {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+  }
+  
+  .sticky-segment {
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    z-index: 999;
+  }
+  
+  /* Refrigerator Information Styles */
+  .refinfo {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-}
+    margin: 0;
+    padding-top: 2rem;
+  }
+  
+  /* Status Styles */
+  .status {
+    display: flex;
+    margin: 0;
+    align-items: center;
+  }
+  
+  /* Popover Styles */
+  ion-popover-content {
+    background-color: #ffffff;
+  }
+  
+  

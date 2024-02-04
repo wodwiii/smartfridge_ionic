@@ -1,55 +1,107 @@
-ion-title{
+/* Home.css */
+
+/* Global styles */
+ion-title {
     margin-top: 1rem;
     font-weight: bold;
     color: var(--ion-color-primary);
-}
-
-ion-searchbar.customSearch {
+  }
+  
+  /* Search bar styles */
+  ion-searchbar.customSearch {
     --color: #03045e;
     --placeholder-color: #03045e;
     --icon-color: #03045e;
     --clear-button-color: #03045e;
     --box-shadow: 0;
-    --border-radius: 1.5rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-bottom: 1rem;
-    
-}
-
-ion-buttons.customMenu{
-    color:#caf0f8;
-}
-
-ion-toolbar.customToolbar{
-    --background: #03045e;
-}
-
-.header{
+    --border-radius: 2rem;
+    padding: 1rem 1rem 1rem 1rem;
+  }
+  
+  /* Menu button styles */
+  ion-buttons.customMenu {
+    color: #caf0f8;
+  }
+  
+  /* Header styles */
+  .header {
     background: #03045e;
     box-shadow: none !important;
-}
-
-ion-card{
-    box-shadow: 0px 4px 9px rgba(0, 0, 0, 0.1)!important;
+  }
+  
+  .homeheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  /* Notification styles */
+  .notif {
+    display: flex;
+    justify-content: space-between;
+    color: #caf0f8;
+    padding-right: 1rem;
+    padding-top: 1rem;
+  }
+  
+  /* Toolbar styles */
+  ion-toolbar.customToolbar {
+    --background: #03045e;
+  }
+  
+  /* Location styles */
+  .location {
+    margin-top: 8px;
+  }
+  
+  .mainloc {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .subloc {
+    font-weight: 100;
+    font-size: 0.8rem;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+  
+  /* Icon styles */
+  ion-icon.hearticon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+  }
+  
+  ion-icon.notificon {
+    font-size: 1.5rem;
+  }
+  
+  /* Card styles */
+  ion-card {
+    box-shadow: 0px 4px 9px rgba(0, 0, 0, 0.1) !important;
     border-radius: 1rem;
-    background: var(--ion-card-background, var(--ion-item-background, var(--ion-background-color, #fff)))!important;
-    --color:var(--ion-card-color, var(--ion-item-color, var(--ion-color-step-600, #666666)))!important;
+    background: var(--ion-card-background, var(--ion-item-background, var(--ion-background-color, #fff))) !important;
+    --color: var(--ion-card-color, var(--ion-item-color, var(--ion-color-step-600, #666666))) !important;
     margin-top: 1rem;
-}
-ion-card-header{
+  }
+  
+  ion-card-header {
     padding-bottom: 0.8rem;
-}
-ion-card-title{
+  }
+  
+  ion-card-title {
     font-weight: 700;
     font-size: 1.5rem;
     display: flex;
     align-items: center;
-}
-
-.fridgeTitle{
+  }
+  
+  /* Fridge title styles */
+  .fridgeTitle {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     padding-top: 1rem;
-}
+  }

@@ -27,6 +27,7 @@ import { useEffect, useState } from 'react';
 import { Storage } from '@ionic/storage';
 import FridgeDetailsPage from './pages/FridgeDetailsPage';
 import BuyPage from './pages/BuyPage';
+import { StatusBar } from '@capacitor/status-bar';
 
 
 setupIonicReact();
@@ -47,8 +48,9 @@ const LogoutRoute: React.FC = () => {
 
 const App: React.FC = () => {
   const [authCode, setAuthCode] = useState<string | null>(null);
-
+  
   useEffect(() => {
+    StatusBar.hide();
     const initializeStorage = async () => {
       const store = new Storage();
       await store.create();

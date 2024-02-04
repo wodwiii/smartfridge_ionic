@@ -10,12 +10,35 @@ import {
   IonBackButton,
   IonButton,
   IonIcon,
+  IonFab,
+  IonFabButton,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonSegment,
+  IonSegmentButton,
+  IonPopover,
 } from "@ionic/react";
-import { RouteComponentProps, useHistory } from "react-router-dom";
+import { RouteComponentProps, useHistory, withRouter } from "react-router-dom";
 import moment from "moment";
 import { Storage } from "@ionic/storage";
 import "./FridgeDetailsPage.css";
-import { create, qrCodeOutline } from "ionicons/icons";
+import {
+  create,
+  fastFoodOutline,
+  folderOpen,
+  informationCircleOutline,
+  informationCircleSharp,
+  lockClosedOutline,
+  lockClosedSharp,
+  lockOpenOutline,
+  lockOpenSharp,
+  qrCode,
+  qrCodeOutline,
+  thermometer,
+  thermometerOutline,
+  thermometerSharp,
+} from "ionicons/icons";
 interface FridgeItem {
   _id: string;
   item_desc: {
@@ -44,13 +67,16 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
           history.push("/login");
           return;
         }
-        const response = await fetch(`https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "auth-token": authToken,
-          },
-        });
+        const response = await fetch(
+          `https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "auth-token": authToken,
+            },
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -103,30 +129,29 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
     return null;
   };
   const buyItems = () => {
-    if(fridgeDetails.status == "available"){
-        if(getLatestLockState().locked){
-            history.push(`/buy-items/${refID}`);
-        }
-        else{
-            alert("There are currently users buying items in this fridge. Please try again later.");
-        }
+    if (fridgeDetails.status == "available") {
+      if (getLatestLockState().locked) {
+        history.push(`/buy-items/${refID}`);
+      } else {
+        alert(
+          "There are currently users buying items in this fridge. Please try again later."
+        );
+      }
+    } else {
+      alert("This fridge is currently unavailable. Please try again later.");
     }
-    else{
-        alert("This fridge is currently unavailable. Please try again later.");
-    }
-  }
-
+  };
   return (
     <IonPage>
-      <IonHeader>
+      <IonHeader className="fridgeheader">
         <IonToolbar>
           <IonButtons slot="start">
-            <IonBackButton></IonBackButton>
+            <IonBackButton color="primary"></IonBackButton>
           </IonButtons>
-          <IonTitle>Fridge Details</IonTitle>
+          <IonTitle className="headertitle">Fridge Details</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className="padding">
         <IonLoading isOpen={loading} message="Loading..." />
         {fridgeDetails && (
           <div>
@@ -134,48 +159,88 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
               <div className="headtitle">
                 <h6 style={{ margin: 0 }}>{fridgeDetails.fridge_id}</h6>
                 <h1 style={{ margin: 0 }}>{fridgeDetails.location}</h1>
+                <p className="status"><IonIcon id="hover-trigger" color="primary" icon={informationCircleSharp}/>{fridgeDetails.status}</p>
+                  <IonPopover trigger="hover-trigger" triggerAction="hover">
+                    <IonContent class="ion-padding">This refrigerator is currently unavailable.</IonContent>
+                  </IonPopover>
               </div>
-              <div className="qrbtn">
-                  <IonButton fill="outline" onClick={buyItems}>
-                    <IonIcon slot="icon-only" icon={qrCodeOutline} size="large"></IonIcon>
-                  </IonButton>
-              </div>
+              <div className="refinfo">
+              <p style={{ margin: 0 }}>
+                <IonIcon color="primary" icon={thermometerOutline} />{" "}
+                {getLatestTemperature()} °C
+              </p>
+              {getLatestLockState() && (
+                <>
+                  <p style={{ margin: 0 }}>
+                    {getLatestLockState().locked ? (
+                      <>
+                        <IonIcon color="primary" icon={lockClosedSharp} /> Ready
+                        to serve
+                      </>
+                    ) : (
+                      <>
+                        <IonIcon color="primary" icon={lockOpenSharp} /> Someone
+                        is buying
+                      </>
+                    )}
+                  </p>
+                </>
+              )}
             </div>
-            <p>Status: {fridgeDetails.status}</p>
-            <p>Latest Temperature: {getLatestTemperature()} °C</p>
-            {getLatestLockState() && (
-              <>
-                <p>Lock State:</p>
-                <p>
-                  Timestamp:{" "}
-                  {moment(getLatestLockState().timestamp).format(
-                    "YYYY-MM-DD HH:mm:ss"
-                  )}
-                </p>
-                <p>Locked: {getLatestLockState().locked ? "Yes" : "No"}</p>
-                <p>Executed By: {getLatestLockState().executed_by}</p>
-              </>
-            )}
+            </div>
 
             {fridgeDetails.info.info.items_present.list.length > 0 && (
               <>
-                <p>Present Items:</p>
-                <ul>
+                <h4>Available Products:</h4>
+                <IonSegment
+                  scrollable={true}
+                  value="all"
+                  className="sticky-segment"
+                >
+                  <IonSegmentButton value="all">All</IonSegmentButton>
+                  <IonSegmentButton value="drinks">Drinks</IonSegmentButton>
+                  <IonSegmentButton value="meals">Meals</IonSegmentButton>
+                  <IonSegmentButton value="desserts">Desserts</IonSegmentButton>
+                  <IonSegmentButton value="others">Others</IonSegmentButton>
+                </IonSegment>
+                <IonList lines="inset">
                   {fridgeDetails.info.info.items_present.list.map(
                     (item: FridgeItem) => (
-                      <li key={item._id}>
-                        <p>Item Name: {item.item_desc.item_name}</p>
-                        <p>Price: {item.item_desc.price}</p>
-                        <p>Item Code: {item.item_code}</p>
-                        {/* Add more details as needed */}
-                      </li>
+                      <IonItem key={item._id}>
+                        <IonIcon
+                          aria-hidden="true"
+                          icon={fastFoodOutline}
+                          slot="end"
+                          color="primary"
+                        ></IonIcon>
+                        <IonLabel>
+                          <h1 className="itemcode">{item.item_code}</h1>
+                          <h1 className="productname">
+                            {item.item_desc.item_name}
+                          </h1>
+                          <h1 className="price">${item.item_desc.price}</h1>
+                        </IonLabel>
+                      </IonItem>
                     )
                   )}
-                </ul>
+                </IonList>
               </>
             )}
           </div>
         )}
+        <IonFab
+          vertical="bottom"
+          style={{
+            position: "absolute",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+          slot="fixed"
+        >
+          <IonFabButton onClick={buyItems}>
+            <IonIcon icon={qrCode}></IonIcon>
+          </IonFabButton>
+        </IonFab>
       </IonContent>
     </IonPage>
   );
