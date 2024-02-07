@@ -19,7 +19,6 @@ import {
 } from "@ionic/react";
 import { RouteComponentProps } from "react-router-dom";
 import { Storage } from "@ionic/storage";
-import "./BuyPage.css";
 import { checkmark, fastFoodOutline, lockOpenSharp } from "ionicons/icons";
 interface BuyPageProps extends RouteComponentProps<{ refID: string }> {}
 
@@ -52,7 +51,7 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
       await store.create();
       const authToken = await store.get("auth-token");
       const response = await fetch(
-        `https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}`,
+        `https://default-x4gtw356ia-as.a.run.app/fridge/${refID}`,
         {
           method: "GET",
           headers: {
@@ -92,7 +91,7 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
             const authToken = await store.get("auth-token");
             const detailsPromises = takenItemsArray.map(async (item: any) => {
               const response = await fetch(
-                `https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}/${item.item_code}`,
+                `https://default-x4gtw356ia-as.a.run.app/fridge/${refID}/${item.item_code}`,
                 {
                   method: "GET",
                   headers: {
@@ -131,18 +130,26 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
 
   useEffect(() => {
     initialfetchDataFromDatabase();
-    const newWs = new WebSocket("ws://infinite-byte-413002.as.r.appspot.com");
+    const newWs = new WebSocket("ws://default-x4gtw356ia-as.a.run.app");
     setWs(newWs);
 
     newWs.onopen = () => {
+      newWs.send(JSON.stringify({ type: "subscribe", refID: refID }));
       console.log("WebSocket connection opened.");
     };
 
     newWs.onmessage = (event) => {
-      console.log("WebSocket message received:", event.data);
       const data = JSON.parse(event.data);
       if (data.type === "itemChange") {
-        wsFetchDataFromDatabase(data);
+        if(data.data.fridge_id === refID) {
+          wsFetchDataFromDatabase(data);
+        }
+        else{
+          console.log("data is not for you");
+        }
+      }
+      if(data.type === "lockstateUpdate" && data.data.fridge_id === refID && data.data.locked ==="False") {
+        console.log("transaction completed");
       }
     };
     newWs.onclose = () => {

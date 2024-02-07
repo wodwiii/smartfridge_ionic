@@ -53,7 +53,7 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
         return;
       }
       const response = await fetch(
-        "https://infinite-byte-413002.as.r.appspot.com/fridge/list",
+        "https://default-x4gtw356ia-as.a.run.app/fridge/list",
         {
           method: "GET",
           headers: {
@@ -92,7 +92,7 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
         return;
       }
 
-      let url = "https://infinite-byte-413002.as.r.appspot.com/fridge";
+      let url = "https://default-x4gtw356ia-as.a.run.app/fridge";
       if (query) {
         url += `/${query}`;
         console.log("searching on:" + url);
