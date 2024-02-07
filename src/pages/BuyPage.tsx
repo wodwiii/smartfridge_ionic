@@ -19,6 +19,7 @@ import {
 } from "@ionic/react";
 import { RouteComponentProps } from "react-router-dom";
 import { Storage } from "@ionic/storage";
+import "./BuyPage.css";
 import { checkmark, fastFoodOutline, lockOpenSharp } from "ionicons/icons";
 interface BuyPageProps extends RouteComponentProps<{ refID: string }> {}
 
