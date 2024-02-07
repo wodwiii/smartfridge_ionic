@@ -14,6 +14,8 @@ import {
   IonLoading,
   IonMenuButton,
   IonPage,
+  IonRefresher,
+  IonRefresherContent,
   IonSearchbar,
   IonToolbar,
 } from "@ionic/react";
@@ -35,42 +37,48 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
   const [loading, setLoading] = useState(true);
   const [redirectToLogin, setRedirectToLogin] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const store = new Storage();
-        await store.create();
-        const authToken = await store.get("auth-token");
-        console.log("Auth Code:", authToken);
-        if (!authToken) {
-          setRedirectToLogin(true);
-          return;
-        }
-        const response = await fetch(
-          "https://infinite-byte-413002.as.r.appspot.com/fridge/list",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "auth-token": authToken,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setFridges(data);
-        } else {
-          console.error("Error fetching data:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      const store = new Storage();
+      await store.create();
+      const authToken = await store.get("auth-token");
+      console.log("Auth Code:", authToken);
+      if (!authToken) {
+        setRedirectToLogin(true);
+        return;
       }
-    };
+      const response = await fetch(
+        "https://infinite-byte-413002.as.r.appspot.com/fridge/list",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": authToken,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setFridges(data);
+      } else {
+        console.error("Error fetching data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
+
+  const doRefresh = async (event: CustomEvent) => {
+    await fetchData();
+    event.detail.complete();
+  };
 
   if (redirectToLogin) {
     return <Redirect to="/login" />;
@@ -114,6 +122,9 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
       </div>
 
       <IonContent>
+        <IonRefresher slot="fixed" onIonRefresh={doRefresh}>
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
         <IonLoading isOpen={loading} message="Loading..." />
         <IonList>
           {fridges.map((fridge) => (
