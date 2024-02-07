@@ -20,7 +20,6 @@ import {
   IonPopover,
 } from "@ionic/react";
 import { RouteComponentProps, useHistory, withRouter } from "react-router-dom";
-import moment from "moment";
 import { Storage } from "@ionic/storage";
 import "./FridgeDetailsPage.css";
 import {

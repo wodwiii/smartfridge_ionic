@@ -1,113 +1,152 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-    IonContent,
-    IonPage,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
-    IonBackButton,
-  } from '@ionic/react';
-import { RouteComponentProps } from 'react-router-dom';
-import { Storage } from '@ionic/storage';
-
+  IonContent,
+  IonPage,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonBackButton,
+  IonIcon,
+  IonFab,
+  IonFabButton,
+  IonCard,
+  IonCardContent,
+  IonAlert,
+} from "@ionic/react";
+import { RouteComponentProps } from "react-router-dom";
+import { Storage } from "@ionic/storage";
+import "./BuyPage.css";
+import { checkmark, fastFoodOutline, lockOpenSharp } from "ionicons/icons";
 interface BuyPageProps extends RouteComponentProps<{ refID: string }> {}
 
 const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
   const refID = match.params.refID;
   const [itemList, setItemList] = useState<any[]>([]);
+  const [takenItems, setTakenItems] = useState<any[]>([]);
   const [ws, setWs] = useState<WebSocket | null>(null);
+
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const handleFabClick = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmation = (confirmed: boolean) => {
+    setShowConfirmation(false);
+
+    if (confirmed) {
+      console.log('Transaction confirmed');
+    } else {
+      console.log('Transaction cancelled');
+    }
+  };
 
   // Function to fetch data from the database
   const initialfetchDataFromDatabase = async () => {
     try {
       const store = new Storage();
       await store.create();
-      const authToken = await store.get('auth-token');
-
-      const response = await fetch(`https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'auth-token': authToken,
-        },
-      });
+      const authToken = await store.get("auth-token");
+      const response = await fetch(
+        `https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": authToken,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
-
-        // Assuming data has the 'info' object with 'items_present' property
         const itemListArray = data.info?.info?.items_present?.list || [];
+        console.log("Initial items present:", itemListArray);
         setItemList(itemListArray);
       } else {
-        console.error('Error fetching fridge details:', response.statusText);
+        console.error("Error fetching fridge details:", response.statusText);
       }
     } catch (error) {
-      console.error('Error fetching initial data:', error);
+      console.error("Error fetching initial data:", error);
     }
   };
 
   const wsFetchDataFromDatabase = async (data: any) => {
-    console.log('wsFetchDataFromDatabase called with data:', data);
+    console.log("wsFetchDataFromDatabase called with data:", data);
     try {
-      const itemCodes = data.data.item_list; // Assuming the data contains an array of item codes
-      console.log('Item codes:', itemCodes);
-  
-      // Check if itemCodes is defined before attempting to map over it
-      if (itemCodes && Array.isArray(itemCodes)) {
-        const store = new Storage();
-        await store.create();
-        const authToken = await store.get('auth-token');
-        const detailsPromises = itemCodes.map(async (itemCode: any) => {
-          const response = await fetch(`https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}/${itemCode}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'auth-token': authToken,
-            },
+      const itemCodes = data.data.item_list;
+      console.log("Item codes:", itemCodes);
+      setItemList((prevItemList) => {
+        console.log("Initial Item codes:", prevItemList);
+        const takenItemsArray = prevItemList.filter(
+          (item) => !itemCodes.includes(item.item_code)
+        );
+        console.log("items removed: ", takenItemsArray);
+        if (takenItemsArray && Array.isArray(takenItemsArray)) {
+          const store = new Storage();
+          store.create().then(async () => {
+            const authToken = await store.get("auth-token");
+            const detailsPromises = takenItemsArray.map(async (item: any) => {
+              const response = await fetch(
+                `https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}/${item.item_code}`,
+                {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "auth-token": authToken,
+                  },
+                }
+              );
+
+              if (response.ok) {
+                return response.json();
+              } else {
+                console.error(
+                  `Error fetching item details for ${item}:`,
+                  response.statusText
+                );
+                return null;
+              }
+            });
+            const updatedItemList = await Promise.all(detailsPromises);
+            console.log("Taken items number: " + updatedItemList.length);
+            setTakenItems(updatedItemList.filter((item) => item !== null)); // Update taken items
           });
-  
-          if (response.ok) {
-            return response.json();
-          } else {
-            console.error(`Error fetching item details for ${itemCode}:`, response.statusText);
-            return null;
-          }
-        });
-  
-        const updatedItemList = await Promise.all(detailsPromises);
-        setItemList(updatedItemList.filter(item => item !== null)); // Filter out null values
-      } else {
-        console.error('Item codes are not defined or not an array:', itemCodes);
-      }
+        } else {
+          console.error(
+            "Item codes are not defined or not an array:",
+            itemCodes
+          );
+        }
+        return prevItemList;
+      });
     } catch (error) {
-      console.error('Error fetching item details:', error);
+      console.error("Error fetching item details:", error);
     }
   };
 
   useEffect(() => {
-    // Fetch initial data from the database during component mount
     initialfetchDataFromDatabase();
-
-    const newWs = new WebSocket('ws://infinite-byte-413002.as.r.appspot.com');
+    const newWs = new WebSocket("ws://infinite-byte-413002.as.r.appspot.com");
     setWs(newWs);
 
     newWs.onopen = () => {
-      console.log('WebSocket connection opened.');
+      console.log("WebSocket connection opened.");
     };
 
     newWs.onmessage = (event) => {
-      console.log('WebSocket message received:', event.data);
+      console.log("WebSocket message received:", event.data);
       const data = JSON.parse(event.data);
-      if (data.type === 'itemChange') {
+      if (data.type === "itemChange") {
         wsFetchDataFromDatabase(data);
       }
     };
     newWs.onclose = () => {
-      console.log('WebSocket connection closed.');
+      console.log("WebSocket connection closed.");
     };
     return () => {
       newWs.close();
@@ -116,28 +155,74 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
 
   return (
     <IonPage>
-      <IonHeader>
+      <IonHeader className="checkoutHeader">
         <IonToolbar>
           <IonButtons slot="start">
             <IonBackButton />
           </IonButtons>
-          <IonTitle>Buy Page for {refID}</IonTitle>
+          <IonTitle>Checkout</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
-        <IonList>
-          {itemList.map((item) => (
-            <IonItem key={item._id}>
-              <IonLabel>
-                <h3>{item.item_desc.item_name}</h3>
-                <p>Price: {item.item_desc.price}</p>
-                <p>Item Code: {item.item_code}</p>
-                {/* Add more details as needed */}
-              </IonLabel>
-            </IonItem>
-          ))}
-        </IonList>
+      <IonContent className="paddingcheckout">
+        <IonCard>
+          <IonCardContent>
+            {takenItems.length === 0 ? (
+              <p>Items taken will be displayed here.</p>
+            ) : (
+              <IonList lines="inset">
+                {takenItems.map((item) => (
+                  <IonItem key={item._id}>
+                    <IonIcon
+                      aria-hidden="true"
+                      icon={fastFoodOutline}
+                      slot="end"
+                      color="primary"
+                    ></IonIcon>
+                    <IonLabel>
+                      <h1 className="itemcode">{item.item_code}</h1>
+                      <h1 className="productname">
+                        {item.item_desc.item_name}
+                      </h1>
+                      <h1 className="price">${item.item_desc.price}</h1>
+                    </IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
+            )}
+          </IonCardContent>
+        </IonCard>
+
+        <IonFab
+          vertical="bottom"
+          style={{
+            position: "absolute",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+          slot="fixed"
+        >
+          <IonFabButton onClick={handleFabClick}>
+            <IonIcon size="large" icon={checkmark}></IonIcon>
+          </IonFabButton>
+        </IonFab>
       </IonContent>
+      <IonAlert className="alert"
+        isOpen={showConfirmation}
+        onDidDismiss={() => setShowConfirmation(false)}
+        header={'Confirm Transaction'}
+        message={'Do you want to proceed with your purchase?'}
+        buttons={[
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => handleConfirmation(false),
+          },
+          {
+            text: 'Confirm',
+            handler: () => handleConfirmation(true),
+          },
+        ]}
+      />
     </IonPage>
   );
 };
