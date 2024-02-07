@@ -1,0 +1,17 @@
+ .checkoutHeader {
+    box-shadow: none !important;
+    .headertitle {
+        font-size: 1.2rem;
+      }
+  }
+
+  ion-content.paddingcheckout{
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+  }  
+
+  ion-alert.alert{
+    --min-width: 50vw;
+    --max-width: 80vw;
+  }
+  

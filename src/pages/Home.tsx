@@ -178,8 +178,7 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
               <IonItem
                 className="search"
                 key={searchResults.fridge_id}
-                onClick={() => handleSearchClick(searchResults.fridge_id)}
-              >
+                onClick={() => handleSearchClick(searchResults.fridge_id)}>
                   <IonLabel>{searchResults.fridge_id}-{searchResults.location}</IonLabel>
                   <p>{searchResults.status}</p>
                   <IonIcon
