@@ -67,7 +67,7 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
           return;
         }
         const response = await fetch(
-          `https://infinite-byte-413002.as.r.appspot.com/fridge/${refID}`,
+          `https://default-x4gtw356ia-as.a.run.app/fridge/${refID}`,
           {
             method: "GET",
             headers: {
