@@ -95,7 +95,6 @@ ion-title {
     font-weight: 700;
     font-size: 1.5rem;
     display: flex;
-    align-items: center;
   }
   
   /* Fridge title styles */
@@ -104,4 +103,9 @@ ion-title {
     flex-direction: row;
     justify-content: space-between;
     padding-top: 1rem;
+  }
+
+  ion-item.search{
+    display: flex;
+    flex-direction: column;
   }

@@ -10,6 +10,8 @@ import {
   IonFabButton,
   IonHeader,
   IonIcon,
+  IonItem,
+  IonLabel,
   IonList,
   IonLoading,
   IonMenuButton,
@@ -36,6 +38,9 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
   const [fridges, setFridges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [redirectToLogin, setRedirectToLogin] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any>({});
+  const [showResultsModal, setShowResultsModal] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -71,6 +76,49 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
     }
   };
 
+  const handleInput = async (ev: CustomEvent) => {
+    let query = "";
+    const target = ev.target as HTMLIonSearchbarElement;
+    if (target) query = target.value!.toLowerCase();
+    setSearchQuery(query);
+
+    try {
+      const store = new Storage();
+      await store.create();
+      const authToken = await store.get("auth-token");
+      console.log("Auth Code:", authToken);
+      if (!authToken) {
+        setRedirectToLogin(true);
+        return;
+      }
+
+      let url = "https://infinite-byte-413002.as.r.appspot.com/fridge";
+      if (query) {
+        url += `/${query}`;
+        console.log("searching on:" + url);
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": authToken,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          setSearchResults(data);
+        } else {
+          console.error("Error fetching search results:", response.statusText);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -83,6 +131,10 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
   if (redirectToLogin) {
     return <Redirect to="/login" />;
   }
+
+  const handleSearchClick = (refID: string) => {
+    history.push(`/fridge-details/${refID}`);
+  };
 
   const handleCardClick = (refID: string) => {
     history.push(`/fridge-details/${refID}`);
@@ -115,9 +167,29 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
         </IonToolbar>
         <IonToolbar class="customToolbar">
           <IonSearchbar
+            debounce={1000}
+            value={searchQuery}
+            onIonInput={(ev) => handleInput(ev)}
             placeholder="Search for smart fridge"
             class="customSearch"
           ></IonSearchbar>
+          <IonList>
+            {searchResults && Object.keys(searchResults).length > 0 && (
+              <IonItem
+                className="search"
+                key={searchResults.fridge_id}
+                onClick={() => handleSearchClick(searchResults.fridge_id)}
+              >
+                  <IonLabel>{searchResults.fridge_id}-{searchResults.location}</IonLabel>
+                  <p>{searchResults.status}</p>
+                  <IonIcon
+                      icon={chevronForwardCircle}
+                      size="small"
+                      color="primary"
+                    ></IonIcon>
+              </IonItem>
+            )}
+          </IonList>
         </IonToolbar>
       </div>
 
