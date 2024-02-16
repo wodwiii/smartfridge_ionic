@@ -18,10 +18,12 @@ import {
   IonSegment,
   IonSegmentButton,
   IonPopover,
+  IonAlert,
 } from "@ionic/react";
 import { RouteComponentProps, useHistory, withRouter } from "react-router-dom";
 import { Storage } from "@ionic/storage";
 import "./FridgeDetailsPage.css";
+import axios from "axios";
 import {
   create,
   fastFoodOutline,
@@ -53,23 +55,29 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
   const refID = match.params.refID;
   const [fridgeDetails, setFridgeDetails] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchAuthToken = async () => {
+      try {
+        const store = new Storage();
+        await store.create();
+        const token = await store.get("auth-token");
+        setAuthToken(token);
+      } catch (error) {
+        console.error("Error fetching auth token:", error);
+      }
+    };
+
+    fetchAuthToken();
+  }, []);
   useEffect(() => {
     const fetchFridgeDetails = async () => {
       try {
-        // Get auth-token from storage
-        const store = new Storage();
-        await store.create();
-        const authToken = await store.get("auth-token");
-
-        if (!authToken) {
-          history.push("/login");
-          return;
-        }
-        const response = await fetch(
+        const response = await axios.get(
           `https://default-x4gtw356ia-as.a.run.app/fridge/${refID}`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               "auth-token": authToken,
@@ -77,9 +85,8 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
           }
         );
 
-        if (response.ok) {
-          const data = await response.json();
-          setFridgeDetails(data);
+        if (response.status === 200) {
+          setFridgeDetails(response.data);
         } else {
           console.error("Error fetching fridge details:", response.statusText);
         }
@@ -89,9 +96,10 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
         setLoading(false);
       }
     };
-
-    fetchFridgeDetails();
-  }, [refID]);
+    if(authToken){
+      fetchFridgeDetails();
+    }
+  }, [refID, authToken]);
 
   const getLatestTemperature = () => {
     if (
@@ -127,10 +135,42 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
     }
     return null;
   };
-  const buyItems = () => {
+  const handleFabClick = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmation = (confirmed: boolean) => {
+    setShowConfirmation(false);
+    if (confirmed) {
+      buyItems();
+    } else {
+      console.log("Transaction cancelled");
+    }
+  };
+  const buyItems = async () => {
+    let paymentIntentId;
     if (fridgeDetails.status == "available") {
-      if (getLatestLockState().locked) {
-        history.push(`/buy-items/${refID}`);
+      if (!getLatestLockState().locked) {
+        try {
+          const response = await axios.post(
+            `https://default-x4gtw356ia-as.a.run.app/payment/hold-payment`,
+            {},
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "auth-token": authToken,
+              },
+            }
+          );
+          paymentIntentId = response.data.paymentIntent.id;
+          console.log(paymentIntentId);
+          history.push(`/buy-items/${refID}/${paymentIntentId}`);
+        } catch (error) {
+          alert(
+            "Please ensure your account has a valid payment method."
+          );
+          console.error("Error while holding payment:", error);
+        }
       } else {
         alert(
           "There are currently users buying items in this fridge. Please try again later."
@@ -172,7 +212,6 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
                   </IonContent>
                 </IonPopover>
               </div>
-            
             </div>
 
             {fridgeDetails.info.info.items_present.list.length > 0 && (
@@ -223,10 +262,30 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
           }}
           slot="fixed"
         >
-          <IonFabButton onClick={buyItems}>
+          <IonFabButton onClick={handleFabClick}>
             <IonIcon size="large" icon={lockOpenSharp}></IonIcon>
           </IonFabButton>
         </IonFab>
+        <IonAlert
+          className="alert"
+          isOpen={showConfirmation}
+          onDidDismiss={() => setShowConfirmation(false)}
+          header={"Confirm Transaction"}
+          message={
+            "Do you want to proceed opening the fridge? This action will hold $10 from your card."
+          }
+          buttons={[
+            {
+              text: "Cancel",
+              role: "cancel",
+              handler: () => handleConfirmation(false),
+            },
+            {
+              text: "Confirm",
+              handler: () => handleConfirmation(true),
+            },
+          ]}
+        />
       </IonContent>
     </IonPage>
   );

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">smartfridge</string>
+    <string name="title_activity_main">smartfridge</string>
+    <string name="package_name">com.smartfridge.SmartFridge</string>
+    <string name="custom_url_scheme">com.smartfridge.SmartFridge</string>
+</resources>

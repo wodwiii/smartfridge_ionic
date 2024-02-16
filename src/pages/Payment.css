@@ -1,0 +1,35 @@
+.paymentHeader{
+    box-shadow: none !important;
+    .headertitle {
+        font-size: 1.2rem;
+      }
+}
+
+.paymentHeader {
+  background-color: #3880ff;
+  color: #fff;
+}
+
+.payment-card {
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &.selected {
+    background-color: #a1c3ff !important;
+  }
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.ion-padding {
+  padding: 20px;
+}
+
+.ion-button {
+  margin-top: 10px;
+}
+
+/* Add more styles based on your design preferences */

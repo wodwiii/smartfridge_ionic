@@ -11,7 +11,7 @@ import {
 } from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
-import { homeOutline, homeSharp, logOutOutline, logOutSharp, personOutline, personSharp, receiptOutline, receiptSharp, settingsOutline, settingsSharp, snowOutline, snowSharp } from 'ionicons/icons';
+import { cardOutline, cardSharp, homeOutline, homeSharp, logOutOutline, logOutSharp, personOutline, personSharp, receiptOutline, receiptSharp, settingsOutline, settingsSharp, snowOutline, snowSharp } from 'ionicons/icons';
 import './Menu.css';
 
 interface AppPage {
@@ -35,10 +35,10 @@ const appPages: AppPage[] = [
     mdIcon: snowSharp
   },
   {
-    title: 'Vouchers',
-    url: '/vouchers',
-    iosIcon: receiptOutline,
-    mdIcon: receiptSharp
+    title: 'Payment Methods',
+    url: '/payment',
+    iosIcon: cardOutline,
+    mdIcon: cardSharp
   },
   {
     title: 'My Account',

@@ -1,9 +1,10 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'com.smartfridge.SmartFridge',
   appName: 'smartfridge',
-  webDir: 'dist',
+  webDir: 'www',
+  bundledWebRuntime: false,
   server: {
     androidScheme: 'https'
   }

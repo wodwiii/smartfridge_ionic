@@ -16,36 +16,26 @@ import {
   IonCard,
   IonCardContent,
   IonAlert,
+  IonButton,
 } from "@ionic/react";
-import { RouteComponentProps } from "react-router-dom";
+import { RouteComponentProps, useHistory } from "react-router-dom";
 import { Storage } from "@ionic/storage";
 import "./BuyPage.css";
 import { checkmark, fastFoodOutline, lockOpenSharp } from "ionicons/icons";
-interface BuyPageProps extends RouteComponentProps<{ refID: string }> {}
+import axios from "axios";
+interface BuyPageProps
+  extends RouteComponentProps<{ refID: string; paymentIntentId: string }> {}
 
 const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
   const refID = match.params.refID;
+  const paymentIntentId = match.params.paymentIntentId;
+  const history = useHistory();
   const [itemList, setItemList] = useState<any[]>([]);
   const [takenItems, setTakenItems] = useState<any[]>([]);
   const [ws, setWs] = useState<WebSocket | null>(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
 
-  const [showConfirmation, setShowConfirmation] = useState(false);
-
-  const handleFabClick = () => {
-    setShowConfirmation(true);
-  };
-
-  const handleConfirmation = (confirmed: boolean) => {
-    setShowConfirmation(false);
-
-    if (confirmed) {
-      console.log('Transaction confirmed');
-    } else {
-      console.log('Transaction cancelled');
-    }
-  };
-
-  // Function to fetch data from the database
   const initialfetchDataFromDatabase = async () => {
     try {
       const store = new Storage();
@@ -128,29 +118,103 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
       console.error("Error fetching item details:", error);
     }
   };
+  useEffect(() => {
+    const calculateTotalPrice = () => {
+      const totalPriceSum = takenItems.reduce((acc, item) => {
+        return acc + item.item_desc.price;
+      }, 0);
+      setTotalPrice(totalPriceSum);
+    };
 
+    calculateTotalPrice();
+  }, [takenItems]);
+
+  const capturePayment = async () => {
+    try {
+      const store = new Storage();
+      await store.create();
+      const authToken = await store.get("auth-token");
+      const response = await axios.post(
+        "https://default-x4gtw356ia-as.a.run.app/payment/capture-payment",
+        {
+          pi_id: paymentIntentId,
+          amount: totalPrice * 100,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": authToken,
+          },
+        }
+      );
+      if (response.data === "Payment successfully captured") {
+        console.log("Payment successfully captured");
+      } else {
+        console.error("Error capturing payment:", response.data);
+      }
+    } catch (error) {
+      console.error("Error capturing payment:", error);
+    }
+  };
+  const cancelPayment = async () => {
+    try {
+      const store = new Storage();
+      await store.create();
+      const authToken = await store.get("auth-token");
+      const response = await axios.post(
+        "https://default-x4gtw356ia-as.a.run.app/payment/cancel-payment",
+        {
+          pi_id: paymentIntentId
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": authToken,
+          },
+        }
+      );
+      if (response.data === "Transaction has been cancelled") {
+        console.log("Transaction has been cancelled");
+      } else {
+        console.error("Error cancelling payment:", response.data);
+      }
+    } catch (error) {
+      console.error("Error cancelling payment:", error);
+    }
+  };
   useEffect(() => {
     initialfetchDataFromDatabase();
     const newWs = new WebSocket("ws://default-x4gtw356ia-as.a.run.app");
     setWs(newWs);
-
     newWs.onopen = () => {
       newWs.send(JSON.stringify({ type: "subscribe", refID: refID }));
       console.log("WebSocket connection opened.");
     };
-
     newWs.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === "itemChange") {
-        if(data.data.fridge_id === refID) {
+        if (data.data.fridge_id === refID) {
           wsFetchDataFromDatabase(data);
-        }
-        else{
+        } else {
           console.log("data is not for you");
         }
       }
-      if(data.type === "lockstateUpdate" && data.data.fridge_id === refID && data.data.locked ==="False") {
-        console.log("transaction completed");
+      if (
+        data.type === "lockstateUpdate" &&
+        data.data.fridge_id === refID &&
+        data.data.locked === "False"
+      ) {
+        try {
+          if (takenItems.length > 0) {
+            capturePayment();
+            setShowAlert(true);
+          } else {
+            cancelPayment();
+          }
+          history.push("/");
+        } catch (error) {
+          console.error("Error capturing payment:", error);
+        }
       }
     };
     newWs.onclose = () => {
@@ -165,9 +229,6 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
     <IonPage>
       <IonHeader className="checkoutHeader">
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonBackButton />
-          </IonButtons>
           <IonTitle>Checkout</IonTitle>
         </IonToolbar>
       </IonHeader>
@@ -199,37 +260,19 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
             )}
           </IonCardContent>
         </IonCard>
-
-        <IonFab
-          vertical="bottom"
-          style={{
-            position: "absolute",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-          slot="fixed"
-        >
-          <IonFabButton onClick={handleFabClick}>
-            <IonIcon size="large" icon={checkmark}></IonIcon>
-          </IonFabButton>
-        </IonFab>
+        {takenItems.length > 0 && (
+          <div className="totalPrice">
+            <p>Total Price of Items Taken: ${totalPrice.toFixed(2)}</p>
+          </div>
+        )}
+        {/* <IonButton onClick={capturePayment}>Capture</IonButton> */}
       </IonContent>
-      <IonAlert className="alert"
-        isOpen={showConfirmation}
-        onDidDismiss={() => setShowConfirmation(false)}
-        header={'Confirm Transaction'}
-        message={'Do you want to proceed with your purchase?'}
-        buttons={[
-          {
-            text: 'Cancel',
-            role: 'cancel',
-            handler: () => handleConfirmation(false),
-          },
-          {
-            text: 'Confirm',
-            handler: () => handleConfirmation(true),
-          },
-        ]}
+      <IonAlert
+        isOpen={showAlert}
+        onDidDismiss={() => setShowAlert(false)}
+        header={"Transaction Completed"}
+        message={"Your transaction has been successfully completed."}
+        buttons={["OK"]}
       />
     </IonPage>
   );
