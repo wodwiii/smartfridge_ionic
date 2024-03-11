@@ -45,7 +45,7 @@ const Payment: React.FC = () => {
     const fetchPaymentMethods = async () => {
       try {
         const response = await axios.get(
-          "https://default-x4gtw356ia-as.a.run.app/payment/payment-methods",
+          "https://smart-fridge-server-whx4slgp5q-as.a.run.app/payment/payment-methods",
           {
             headers: {
               "Content-Type": "application/json",
@@ -73,7 +73,7 @@ const Payment: React.FC = () => {
     try {
       if (selectedMethod) {
         await axios.post(
-          "https://default-x4gtw356ia-as.a.run.app/payment/set-default",
+          "https://smart-fridge-server-whx4slgp5q-as.a.run.app/payment/set-default",
           {
             pm_id: selectedMethod,
           },
@@ -85,7 +85,7 @@ const Payment: React.FC = () => {
           }
         );        
         const updatedPaymentMethods = await axios.get(
-          "https://default-x4gtw356ia-as.a.run.app/payment/payment-methods",
+          "https://smart-fridge-server-whx4slgp5q-as.a.run.app/payment/payment-methods",
           {
             headers: {
               "Content-Type": "application/json",
@@ -106,7 +106,7 @@ const Payment: React.FC = () => {
       });
 
       const response = await axios.post(
-        "https://default-x4gtw356ia-as.a.run.app/payment/payment-sheet",
+        "https://smart-fridge-server-whx4slgp5q-as.a.run.app/payment/payment-sheet",
         {},
         {
           headers: {

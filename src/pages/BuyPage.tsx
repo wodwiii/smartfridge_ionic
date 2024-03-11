@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   IonContent,
   IonPage,
@@ -35,14 +35,14 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [showAlert, setShowAlert] = useState(false);
   const [totalPrice, setTotalPrice] = useState<number>(0);
-
+  const totalPriceRef = useRef<number>(0);
   const initialfetchDataFromDatabase = async () => {
     try {
       const store = new Storage();
       await store.create();
       const authToken = await store.get("auth-token");
       const response = await fetch(
-        `https://default-x4gtw356ia-as.a.run.app/fridge/${refID}`,
+        `https://smart-fridge-server-whx4slgp5q-as.a.run.app/fridge/${refID}`,
         {
           method: "GET",
           headers: {
@@ -82,7 +82,7 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
             const authToken = await store.get("auth-token");
             const detailsPromises = takenItemsArray.map(async (item: any) => {
               const response = await fetch(
-                `https://default-x4gtw356ia-as.a.run.app/fridge/${refID}/${item.item_code}`,
+                `https://smart-fridge-server-whx4slgp5q-as.a.run.app/fridge/${refID}/${item.item_code}`,
                 {
                   method: "GET",
                   headers: {
@@ -118,12 +118,14 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
       console.error("Error fetching item details:", error);
     }
   };
+
   useEffect(() => {
     const calculateTotalPrice = () => {
       const totalPriceSum = takenItems.reduce((acc, item) => {
-        return acc + item.item_desc.price;
+        return acc + item.item_desc.product_info.price;
       }, 0);
       setTotalPrice(totalPriceSum);
+      totalPriceRef.current = totalPriceSum;
     };
 
     calculateTotalPrice();
@@ -134,11 +136,12 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
       const store = new Storage();
       await store.create();
       const authToken = await store.get("auth-token");
+      console.log(totalPriceRef.current);
       const response = await axios.post(
-        "https://default-x4gtw356ia-as.a.run.app/payment/capture-payment",
+        "https://smart-fridge-server-whx4slgp5q-as.a.run.app/payment/capture-payment",
         {
           pi_id: paymentIntentId,
-          amount: totalPrice * 100,
+          amount: totalPriceRef.current * 100,
         },
         {
           headers: {
@@ -162,7 +165,7 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
       await store.create();
       const authToken = await store.get("auth-token");
       const response = await axios.post(
-        "https://default-x4gtw356ia-as.a.run.app/payment/cancel-payment",
+        "https://smart-fridge-server-whx4slgp5q-as.a.run.app/payment/cancel-payment",
         {
           pi_id: paymentIntentId
         },
@@ -184,7 +187,7 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
   };
   useEffect(() => {
     initialfetchDataFromDatabase();
-    const newWs = new WebSocket("ws://default-x4gtw356ia-as.a.run.app");
+    const newWs = new WebSocket("ws://smart-fridge-server-whx4slgp5q-as.a.run.app");
     setWs(newWs);
     newWs.onopen = () => {
       newWs.send(JSON.stringify({ type: "subscribe", refID: refID }));
@@ -205,12 +208,14 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
         data.data.locked === "False"
       ) {
         try {
-          if (takenItems.length > 0) {
-            capturePayment();
-            setShowAlert(true);
-          } else {
-            cancelPayment();
-          }
+          capturePayment();
+          setShowAlert(true);
+          // if (takenItems.length > 0) {
+          //   capturePayment();
+          //   setShowAlert(true);
+          // } else {
+          //   cancelPayment();
+          // }
           history.push("/");
         } catch (error) {
           console.error("Error capturing payment:", error);
@@ -250,9 +255,9 @@ const BuyPage: React.FC<BuyPageProps> = ({ match }) => {
                     <IonLabel>
                       <h1 className="itemcode">{item.item_code}</h1>
                       <h1 className="productname">
-                        {item.item_desc.item_name}
+                        {item.item_desc.productName}
                       </h1>
-                      <h1 className="price">${item.item_desc.price}</h1>
+                      <h1 className="price">${item.item_desc.product_info.price}</h1>
                     </IonLabel>
                   </IonItem>
                 ))}

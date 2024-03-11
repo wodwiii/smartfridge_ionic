@@ -43,8 +43,13 @@ import {
 interface FridgeItem {
   _id: string;
   item_desc: {
-    item_name: string;
-    price: number;
+    product_info:{
+      price: number;
+      product_desc: string;
+      product_imgURL: string;
+      product_class: string;
+    },
+    productName: string;
   };
   item_code: string;
 }
@@ -76,7 +81,7 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
     const fetchFridgeDetails = async () => {
       try {
         const response = await axios.get(
-          `https://default-x4gtw356ia-as.a.run.app/fridge/${refID}`,
+          `https://smart-fridge-server-whx4slgp5q-as.a.run.app/fridge/${refID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -126,12 +131,7 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
       fridgeDetails.info.info.lockstate
     ) {
       const lockStates = fridgeDetails.info.info.lockstate;
-      if (lockStates.length > 0) {
-        const latestLockState = lockStates[lockStates.length - 1];
-        return latestLockState;
-      } else {
-        return lockStates[0];
-      }
+      return lockStates;
     }
     return null;
   };
@@ -153,7 +153,7 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
       if (!getLatestLockState().locked) {
         try {
           const response = await axios.post(
-            `https://default-x4gtw356ia-as.a.run.app/payment/hold-payment`,
+            `https://smart-fridge-server-whx4slgp5q-as.a.run.app/payment/hold-payment`,
             {},
             {
               headers: {
@@ -213,10 +213,9 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
                 </IonPopover>
               </div>
             </div>
-
+                <h4>Available Products:</h4>
             {fridgeDetails.info.info.items_present.list.length > 0 && (
               <>
-                <h4>Available Products:</h4>
                 <IonSegment
                   scrollable={true}
                   value="all"
@@ -241,9 +240,9 @@ const FridgeDetailsPage: React.FC<FridgeDetailsPageProps> = ({ match }) => {
                         <IonLabel>
                           <h1 className="itemcode">{item.item_code}</h1>
                           <h1 className="productname">
-                            {item.item_desc.item_name}
+                            {item.item_desc.productName}
                           </h1>
-                          <h1 className="price">${item.item_desc.price}</h1>
+                          <h1 className="price">${item.item_desc.product_info.price}</h1>
                         </IonLabel>
                       </IonItem>
                     )

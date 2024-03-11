@@ -19,7 +19,7 @@ const LoginPage: React.FC = () => {
       await store.create();
       
       // Make an API call for authentication
-      const response = await fetch("https://default-x4gtw356ia-as.a.run.app/auth/login", {
+      const response = await fetch("https://smart-fridge-server-whx4slgp5q-as.a.run.app/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
